@@ -2,7 +2,6 @@ package com.restaurant.controller;
 
 import com.restaurant.dto.ModeloMatematicoRequest;
 import com.restaurant.dto.ModeloMatematicoResponse;
-import com.restaurant.services.io;
 import com.restaurant.services.io.InvestigacionOperacionesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
