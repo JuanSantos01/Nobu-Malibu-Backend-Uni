@@ -1,8 +1,10 @@
-FROM maven:3.9.6-eclipse-temurin-20 AS build
+# Paso 1: Compilar la aplicación con Maven oficial y Java
+FROM maven:3.8.8-openjdk-18 AS build
 COPY . .
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:20-jre-alpine
+# Paso 2: Ejecutar la aplicación con Java estándar
+FROM openjdk:20-slim
 COPY --from=build /target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
