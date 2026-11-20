@@ -1,9 +1,11 @@
 package com.restaurant.services.customer;
 
+import com.restaurant.dto.AvailabilityDto;
 import com.restaurant.dto.CategoryDto;
 import com.restaurant.dto.ProductDto;
 import com.restaurant.dto.TableReservationDto;
 
+import java.util.Date;
 import java.util.List;
 
 public interface CustomerService {
@@ -26,6 +28,8 @@ public interface CustomerService {
     ////// Reserve Table Operations
 
     TableReservationDto applyForReservation(TableReservationDto tableReservationDto);
+
+    AvailabilityDto getAvailability(String tableType, Date from, Date to);
 
     List<TableReservationDto> getAllReservationByUserId(Long userId);
 

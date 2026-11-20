@@ -5,6 +5,7 @@ import com.restaurant.dto.*;
 import com.restaurant.entity.*;
 import com.restaurant.enums.ReservationStatus;
 import com.restaurant.repo.*;
+import com.restaurant.services.customer.TableAvailabilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ public class AdminServiceImpl implements AdminService {
     private final ProductRepo productRepo;
 
     private final TableReservationRepo tableReservationRepo;
+
+    private final TableAvailabilityService availabilityService;
 
     /// Category Operations
 
@@ -130,6 +133,9 @@ public class AdminServiceImpl implements AdminService {
         if (optionalTableReservation.isPresent()) {
             Reservation reservation = optionalTableReservation.get();
             if (Objects.equals(status, "Approve")) {
+                // Re-aprobar una reserva rechazada vuelve a ocupar mesa: validar que aún haya cupo.
+                if (reservation.getReservationStatus() == ReservationStatus.DISAPPROVED)
+                    availabilityService.assertRoom(reservation.getTableType(), reservation.getDateTime(), reservation.getDurationMinutes(), reservation.getId());
                 reservation.setReservationStatus(ReservationStatus.APPROVED);
             } else {
                 reservation.setReservationStatus(ReservationStatus.DISAPPROVED);

@@ -24,6 +24,9 @@ public class Reservation {
 
     private Date dateTime;
 
+    /** Cuánto tiempo ocupará la mesa. Null en reservas antiguas = duración por defecto. */
+    private Integer durationMinutes;
+
     private ReservationStatus reservationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -38,6 +41,7 @@ public class Reservation {
         tableReservationDto.setTableType(tableType);
         tableReservationDto.setDescription(description);
         tableReservationDto.setDateTime(dateTime);
+        tableReservationDto.setDurationMinutes(durationMinutes);
         tableReservationDto.setReservationStatus(reservationStatus);
         tableReservationDto.setUserId(user.getId());
         tableReservationDto.setUsername(user.getName());

@@ -16,6 +16,8 @@ public class TableReservationDto {
 
     private Date dateTime;
 
+    private Integer durationMinutes;
+
     private ReservationStatus reservationStatus;
 
     private Long userId;

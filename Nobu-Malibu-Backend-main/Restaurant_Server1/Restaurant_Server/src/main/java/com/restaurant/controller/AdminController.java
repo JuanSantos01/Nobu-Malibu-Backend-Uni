@@ -2,6 +2,7 @@ package com.restaurant.controller;
 
 import com.restaurant.dto.*;
 import com.restaurant.services.admin.AdminService;
+import com.restaurant.services.customer.TableConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,7 +99,12 @@ public class AdminController {
 
     @GetMapping("/reservation/{reservationId}/{status}")
     public ResponseEntity<?> changeReservationStatus(@PathVariable Long reservationId, @PathVariable String status) {
-        TableReservationDto approvedTableReservationDto = adminService.changeReservationStatus(reservationId, status);
+        TableReservationDto approvedTableReservationDto;
+        try {
+            approvedTableReservationDto = adminService.changeReservationStatus(reservationId, status);
+        } catch (TableConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of("message", e.getMessage()));
+        }
         if (approvedTableReservationDto == null)
             return new ResponseEntity<>("Something went wrong!", HttpStatus.BAD_REQUEST);
         return ResponseEntity.status(HttpStatus.OK).body(approvedTableReservationDto);

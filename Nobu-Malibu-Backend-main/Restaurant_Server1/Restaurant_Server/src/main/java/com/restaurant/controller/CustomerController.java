@@ -5,11 +5,15 @@ import com.restaurant.dto.ProductDto;
 import com.restaurant.dto.TableReservationDto;
 import com.restaurant.services.customer.CustomerService;
 import lombok.RequiredArgsConstructor;
+import com.restaurant.services.customer.TableConflictException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -52,10 +56,26 @@ public class CustomerController {
 
     @PostMapping("/reservation")
     public ResponseEntity<?> applyForReservation(@RequestBody TableReservationDto tableReservationDto) {
-        TableReservationDto appliedTableReservationDto = customerService.applyForReservation(tableReservationDto);
-        if (appliedTableReservationDto == null)
-            return new ResponseEntity<>("Something went wrong!", HttpStatus.BAD_REQUEST);
-        return ResponseEntity.status(HttpStatus.CREATED).body(appliedTableReservationDto);
+        try {
+            TableReservationDto appliedTableReservationDto = customerService.applyForReservation(tableReservationDto);
+            if (appliedTableReservationDto == null)
+                return new ResponseEntity<>("Something went wrong!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.CREATED).body(appliedTableReservationDto);
+        } catch (TableConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /** Intervalos ocupados de un tipo de mesa entre `from` y `to` (ISO-8601), para pintar horarios agotados. */
+    @GetMapping("/availability")
+    public ResponseEntity<?> getAvailability(@RequestParam String tableType,
+                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date from,
+                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date to) {
+        try {
+            return ResponseEntity.ok(customerService.getAvailability(tableType, from, to));
+        } catch (TableConflictException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     @GetMapping("/reservations/{userId}")
