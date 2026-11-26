@@ -5,6 +5,7 @@ import com.restaurant.dto.*;
 import com.restaurant.entity.User;
 import com.restaurant.repo.UserRepo;
 import com.restaurant.services.auth.AuthService;
+import com.restaurant.services.google.GoogleAuthService;
 import com.restaurant.services.jwt.UserService;
 import com.restaurant.utill.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -40,6 +41,8 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final GoogleAuthService googleAuthService;
+
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody(required = true) SignupRequest signupRequest) throws Exception {
 
@@ -73,6 +76,22 @@ public class AuthController {
             authenticationResponse.setUserRole(optionalUser.get().getUserRole());
         }
         return authenticationResponse;
+    }
+
+    /** Inicio de sesión / registro con Google (el móvil envía el ID token de Google). */
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginRequest request) {
+        try {
+            GoogleAuthService.GoogleProfile profile = googleAuthService.verify(request.getIdToken());
+            User user = googleAuthService.findOrCreate(profile);
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.setJwt(jwtUtil.generateToken(user));
+            response.setUserId(user.getId());
+            response.setUserRole(user.getUserRole());
+            return ResponseEntity.ok(response);
+        } catch (GoogleAuthService.GoogleAuthException e) {
+            return ResponseEntity.status(e.getStatus()).body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/update")
