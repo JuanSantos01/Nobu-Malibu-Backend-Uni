@@ -63,7 +63,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String jwt = authHeader.substring(7);
 
-        String email = jwtUtil.extractUserName(jwt);
+        String email;
+        try {
+            email = jwtUtil.extractUserName(jwt);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            // Token vencido o manipulado: se sigue sin autenticar (Spring responderá 403, no 500).
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 

@@ -14,4 +14,6 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 
     List<Product> findAllByCategoryId(Long categoryId);
 
+    java.util.Optional<Product> findFirstByNameIgnoreCase(String name);
+
 }
