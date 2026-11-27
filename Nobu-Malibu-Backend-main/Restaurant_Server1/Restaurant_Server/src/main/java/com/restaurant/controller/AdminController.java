@@ -103,7 +103,7 @@ public class AdminController {
         try {
             approvedTableReservationDto = adminService.changeReservationStatus(reservationId, status);
         } catch (TableConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of("message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ConflictBody.of(e));
         }
         if (approvedTableReservationDto == null)
             return new ResponseEntity<>("Something went wrong!", HttpStatus.BAD_REQUEST);

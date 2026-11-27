@@ -1,6 +1,8 @@
 package com.restaurant.services.customer;
 
+import com.restaurant.configs.TableCapacity;
 import com.restaurant.dto.AvailabilityDto;
+import com.restaurant.services.schedule.ScheduleService;
 import com.restaurant.dto.CategoryDto;
 import com.restaurant.dto.ProductDto;
 import com.restaurant.dto.TableReservationDto;
@@ -31,6 +33,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final TableReservationRepo tableReservationRepo;
 
     private final TableAvailabilityService availabilityService;
+    private final ScheduleService scheduleService;
 
 
     //// Categories Operations
@@ -73,13 +76,26 @@ public class CustomerServiceImpl implements CustomerService {
             Date start = tableReservationDto.getDateTime();
             if (start != null && start.getTime() < System.currentTimeMillis() - 5 * 60_000L)
                 throw new TableConflictException("La fecha de la reserva ya pasó");
-            availabilityService.assertRoom(tableReservationDto.getTableType(), start, tableReservationDto.getDurationMinutes(), null);
+            boolean untilClose = Boolean.TRUE.equals(tableReservationDto.getUntilClose());
+            int duration;
+            if (start == null) throw new TableConflictException("Fecha no válida");
+            if (untilClose) {
+                scheduleService.assertOpen(start, TableCapacity.MIN_DURATION_MINUTES);
+                duration = scheduleService.minutesUntilClose(start);
+            } else {
+                duration = TableAvailabilityService.durationOrDefault(tableReservationDto.getDurationMinutes());
+                if (duration < TableCapacity.MIN_DURATION_MINUTES || duration > TableCapacity.MAX_CHOSEN_MINUTES)
+                    throw new TableConflictException("La duración debe estar entre 30 minutos y 4 horas");
+                scheduleService.assertOpen(start, duration);
+            }
+            availabilityService.assertRoom(tableReservationDto.getTableType(), start, duration, null, untilClose);
             Reservation reservation = new Reservation();
             reservation.setTableType(tableReservationDto.getTableType());
             reservation.setDescription(tableReservationDto.getDescription());
             reservation.setReservationStatus(ReservationStatus.PENDING);
             reservation.setDateTime(tableReservationDto.getDateTime());
-            reservation.setDurationMinutes(TableAvailabilityService.durationOrDefault(tableReservationDto.getDurationMinutes()));
+            reservation.setDurationMinutes(duration);
+            reservation.setUntilClose(untilClose);
             reservation.setUser(user);
             Reservation requestedReservation = tableReservationRepo.save(reservation);
             TableReservationDto requestedTableReservationDto = new TableReservationDto();

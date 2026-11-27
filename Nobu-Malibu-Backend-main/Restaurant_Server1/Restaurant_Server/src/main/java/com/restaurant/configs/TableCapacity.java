@@ -19,5 +19,8 @@ public final class TableCapacity {
 
     public static final int DEFAULT_DURATION_MINUTES = 90;
     public static final int MIN_DURATION_MINUTES = 30;
-    public static final int MAX_DURATION_MINUTES = 240;
+    /** Tope técnico (una reserva "hasta el cierre" puede ser larga). */
+    public static final int MAX_DURATION_MINUTES = 14 * 60;
+    /** Tope cuando el cliente elige una duración concreta. */
+    public static final int MAX_CHOSEN_MINUTES = 240;
 }
