@@ -18,6 +18,9 @@ public class TableReservationDto {
 
     private Integer durationMinutes;
 
+    /** Solo en la solicitud: true = la duración será hasta la hora de cierre. */
+    private Boolean untilClose;
+
     private ReservationStatus reservationStatus;
 
     private Long userId;

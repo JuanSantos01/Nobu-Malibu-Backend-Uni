@@ -27,6 +27,9 @@ public class Reservation {
     /** Cuánto tiempo ocupará la mesa. Null en reservas antiguas = duración por defecto. */
     private Integer durationMinutes;
 
+    /** El cliente pidió quedarse hasta el cierre del restaurante. */
+    private Boolean untilClose;
+
     private ReservationStatus reservationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -42,6 +45,7 @@ public class Reservation {
         tableReservationDto.setDescription(description);
         tableReservationDto.setDateTime(dateTime);
         tableReservationDto.setDurationMinutes(durationMinutes);
+        tableReservationDto.setUntilClose(untilClose);
         tableReservationDto.setReservationStatus(reservationStatus);
         tableReservationDto.setUserId(user.getId());
         tableReservationDto.setUsername(user.getName());

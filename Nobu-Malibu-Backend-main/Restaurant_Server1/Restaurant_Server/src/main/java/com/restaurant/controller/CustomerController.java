@@ -62,7 +62,7 @@ public class CustomerController {
                 return new ResponseEntity<>("Something went wrong!", HttpStatus.BAD_REQUEST);
             return ResponseEntity.status(HttpStatus.CREATED).body(appliedTableReservationDto);
         } catch (TableConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ConflictBody.of(e));
         }
     }
 
@@ -74,7 +74,7 @@ public class CustomerController {
         try {
             return ResponseEntity.ok(customerService.getAvailability(tableType, from, to));
         } catch (TableConflictException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ConflictBody.of(e));
         }
     }
 
